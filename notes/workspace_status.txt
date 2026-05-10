@@ -1,13 +1,15 @@
 Lunar Ice Explorer — Workspace Status
 ======================================
-Generated: 2026-05-10T02:25:31Z
-Agent: Haiku subagent (Task 1 chronicler)
+Updated: 2026-05-10 (Phase 4 Complete)
+Agent: Claude Sonnet 4.6
 
 DATABRICKS ENVIRONMENT
   Host:         https://dbc-483cf37d-fbee.cloud.databricks.com
   Profile:      zwapp@protonmail.com
   Compute:      Serverless (SERVERLESS)
   Spark Version: 4.1.0
+  Agent notebook binary: /Users/gwu/.agent_notebook_py312/bin/agent-notebook
+  Python:       3.12 (venv at ~/.agent_notebook_py312) — 3.11 incompatible with DBR 16.4
 
 CATALOG INVENTORY
   lunar_ice            EXISTS  [target catalog]
@@ -17,19 +19,34 @@ CATALOG INVENTORY
   weather_network_sandbox EXISTS
   workspace            EXISTS
 
-TASK 1 RESULTS — lunar_ice.south_pole
-  lunar_ice catalog:   EXISTS (pre-existing)
-  south_pole schema:   CREATED this run (was absent — only default + information_schema existed)
-  raw_pds_blobs volume: MISSING — to be created in Task 4
+UNITY CATALOG TABLES — lunar_ice.south_pole
+  bronze_lend_metadata          EXISTS  28,729 rows · PDS3 index, partitioned by release_id
+  silver_lend_targets           EXISTS  71,327 rows · June 2010 · 379 orbits · lat ≤ −85°
+  silver_lola_slopes            EXISTS  30,192 cells · LOLA 40m/pixel · slope 1.80°–33.54°
+  config_gold_params            EXISTS  Gold v0.03 + v0.04 params (no hardcoded values)
+  gold_psr_rpi_rankings         EXISTS  11,734 cells · v0.03 SETN + mock slope
+  gold_v4_shackleton_precision  EXISTS  11,734 cells · v0.04 CSETN + real LOLA slope
 
-NEXT STEPS
-  - Create Volume raw_pds_blobs under lunar_ice.south_pole (Task 4)
-  - Initialize Bronze ingestion notebook src/bronze_ingestion.md (Task 5)
-  - Confirm created_by_agent tag propagation on south_pole schema
+VOLUME
+  raw_pds_blobs  EXISTS at /Volumes/lunar_ice/south_pole/raw_pds_blobs
 
-NOTES
-  - Python 3.11 incompatible with databricks-connect 16.4.* — resolved by installing
-    Python 3.12 venv at ~/.agent_notebook_py312 and prepending to PATH for all runs.
-  - All agent-notebook runs must use:
-      PATH="/Users/gwu/.agent_notebook_py312/bin:$PATH"
-      --profile zwapp@protonmail.com --cluster SERVERLESS
+LOCAL OUTPUTS
+  data/gold_v4_psr_rankings.csv  EXISTS  11,734 rows · 890 KB · priority_tier + annotation
+
+GITHUB
+  Repo:   github.com/zwleoapp/Lunar_ice (public)
+  Branch: main
+  Status: Phase 4 complete — README, CSV, all notebooks, notes, action docs published
+
+PHASE STATUS
+  Phase 1 — Bronze:        ✅ COMPLETE
+  Phase 2 — Silver LEND:   ✅ COMPLETE (June 2010 full month)
+  Phase 3 — Gold v0.03:    ✅ COMPLETE (SETN + mock slope)
+  Phase 4 — Gold v0.04:    ✅ COMPLETE (CSETN + real LOLA slope + CSV export + GitHub)
+  Phase 5 — Full mission:  PENDING (Sept 2009–Sept 2010, ~875k rows, Chang'e-7 validation)
+
+KEY FINDINGS
+  de Gerlache (−88.3°, 272°E): NSI up to 1.0, slope 3–5°, Priority 1
+  Faustini (−87.2°, 83°E):    NSI 0.55–1.0, within-PSR confirmed, flattest floor
+  Shackleton (−89.7°, 130°E): NSI likely underestimated (rim/floor mixing), 379-orbit coverage
+  RPI ceiling: 0.556 at 0.25° grid (min cell slope 1.8°); 1.5 threshold requires pixel-level DEM

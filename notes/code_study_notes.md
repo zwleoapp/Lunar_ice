@@ -175,6 +175,40 @@ precision in latitude. The real v0.04 upgrades are CSETN signal + LOLA real slop
 
 ---
 
+## Phase 4 Completion — CSV Export + GitHub Publication (2026-05-10)
+
+### CSV Export Design (`src/export_gold_csv.md`)
+Gold v0.04 exported to local CSV via `spark.sql().toPandas()` + `pandas.to_csv()`.
+
+**Key path decision:** `OUT_PATH` must be a **local filesystem path**, not a Unity Catalog
+Volume path. The agent-notebook CLI runs in a local Python 3.12 venv via Databricks Connect —
+`/Volumes/...` FUSE mounts do not exist locally. `spark.sql()` reads remote Delta tables fine
+(Databricks Connect tunnels the query); only the final `to_csv()` write is local.
+
+Correct path: `/Users/gwu/Documents/Lunar_ice/data/gold_v4_psr_rankings.csv`
+
+### Annotation Columns Added
+Two derived columns added at export time (not stored in Gold Delta table — kept lean):
+- `priority_tier`: `Prime` (NSI ≥ 0.6 AND slope ≤ 6°) / `Watch` (NSI ≥ 0.3) / `Background`
+- `annotation`: human-readable note for notable cells (within-PSR confirmed, strong suppression)
+
+### Export Results (2026-05-10)
+- 11,734 rows · 12 columns · 890 KB
+- Prime cells: high-suppression + accessible terrain (de Gerlache, Faustini)
+- Within-PSR annotated cells confirmed for Faustini interior
+
+### GitHub Publication
+Repo: `github.com/zwleoapp/Lunar_ice` (already initialised from Phase 1).
+Published in one commit: README.md, data/gold_v4_psr_rankings.csv, all src/ notebooks,
+config/, notes/, action_v0.01–v0.04.md.
+
+**README.md design rationale:** Concise GitHub landing page (~100 lines) referencing
+`notes/south_pole_targeting_report.md` for full science detail. Contains PSR rankings table,
+column schema, medallion architecture ASCII diagram, reproducibility notebook order, and
+RPI ceiling explanation — enough for a NASA reader to understand findings without running code.
+
+---
+
 ## RPI Formula
 
 $$RPI = \frac{N_{suppression}}{S_{slope}}$$

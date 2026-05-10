@@ -93,6 +93,8 @@ LOLA slope data fetched in Phase 3 only for the lat ≤ −85° grid cells.
 | 2026-05-10 | Gold v0.04 complete: CSETN + LOLA real slope; RPI ≥ 1.5 threshold not met at 0.25° resolution |
 | 2026-05-10 | LOLA GDR discovery: ldem_85s_40m in polar/float_img under lro-l-lola-3-rdr-v1 (not lola-4-gdr) |
 | 2026-05-10 | Grid resolution confirmed 0.25° (not 0.1°); CSETN footprint ≈ 9 km justifies sub-footprint via 379-pass avg |
+| 2026-05-10 | CSV export complete: data/gold_v4_psr_rankings.csv — 11,734 annotated rows, priority_tier + annotation columns |
+| 2026-05-10 | GitHub repo published: github.com/zwleoapp/Lunar_ice — README, science CSV, full pipeline source |
 
 ---
 
@@ -125,9 +127,15 @@ Phase 4 — High-Fidelity (DONE — action_v0.04.md)
        (LOLA GDR ldem_85s_40m_float.img, 230 MB, polar/float_img on Geosciences Node)
   ✅ src/gold_high_res_mapping.md   → 11,734 cells, CSETN NSI + real slope → gold_v4_shackleton_precision
   KEY FINDING: RPI ≥ 1.5 unachievable at 0.25° (min slope 1.8°); threshold meaningful only at pixel-level
-  [ ] Databricks App          → south pole ice concentration map, ranked PSR list
-  [ ] Chang'e-7 validation    → cross-reference after July 2026 dataset release
-  [ ] Phase 5: pixel-level slope from PGDA 5m/pix for Shackleton to reach RPI ≥ 1.5
+  ✅ src/export_gold_csv.md         → data/gold_v4_psr_rankings.csv (11,734 rows, 890 KB, local)
+  ✅ README.md + GitHub push        → github.com/zwleoapp/Lunar_ice — public, NASA-ready
+
+Phase 5 — Scale + Validate (PENDING)
+  [ ] Full Silver ingestion    → Sept 2009–Sept 2010, ~365 files, ~875k rows
+  [ ] Re-run Gold v0.03 + v0.04 → NSI confidence narrows from ~18% SE to ~5% SE
+  [ ] Databricks App           → interactive south pole ice map, ranked PSR list
+  [ ] Chang'e-7 validation     → cross-reference after July 2026 dataset release
+  [ ] Pixel-level slope (PGDA 5m/pix Shackleton) → re-evaluate RPI ≥ 1.5 threshold
 ```
 
 ---
@@ -150,5 +158,5 @@ Phase 4 — High-Fidelity (DONE — action_v0.04.md)
 |---|---|
 | USGS server outage during multi-day Silver run | Checkpoint: save progress CSV per file; resume from last completed |
 | SETN count normalization (C_eq baseline) | Must confirm Release 65 equatorial mean from actual data before Gold |
-| LOLA DEM availability for lat ≤ −85° | Confirm PDS3 LOLA gridded product accessible before Phase 3 |
+| LOLA DEM availability for lat ≤ −85° | ✅ RESOLVED — ldem_85s_40m_float.img confirmed at polar/float_img on Geosciences Node; silver_lola_slopes ingested (Phase 4) |
 | Chang'e-7 dataset format unknown | Monitor CNSA/ESA data release channels; adapt parser when available |

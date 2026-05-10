@@ -140,12 +140,12 @@ Edge cases:
 
 ---
 
-## Terrain Slope (LOLA) — Phase 2 Input
+## Terrain Slope (LOLA) — Phase 4 Complete
 
-LOLA DEM-derived slope will be ingested in Phase 2 at 60 m/pixel resolution.
-The slope raster will be resampled to match the LEND ~9 km grid for RPI join.
-
-Slope source: `LRO-L-LOLA-3-RDR-V1.0` — gridded DEM, 512 pixels/degree.
+LOLA DEM slope ingested in Phase 4 at **40 m/pixel** resolution.
+Source: `ldem_85s_40m_float.img` from `lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/`.
+Result: `lunar_ice.south_pole.silver_lola_slopes` — 30,192 cells, slope range 1.80°–33.54°, mean 9.9°.
+Joined to LEND 0.25° grid for Gold v0.04 RPI calculation. See `src/lola_silver_ingestion.md`.
 
 ---
 
@@ -174,28 +174,30 @@ Bronze: lunar_ice.south_pole.bronze_lend_metadata
     │  Parse with Python struct (big-endian)
     │  Filter: lat <= -85.0° + POINTING + INTERSECTING flags
     ▼
-Silver: lunar_ice.south_pole.silver_lend_targets  ← PILOT COMPLETE (7,209 rows)
+Silver: lunar_ice.south_pole.silver_lend_targets  ✅ COMPLETE (71,327 rows — June 2010)
     │  One row per detector readout over south pole PSRs
     │  Columns: utc, orbit, lat, lon, alt, local_hour,
     │           setn_total, csetn1–4_total, binary_data_url
     │
+Silver: lunar_ice.south_pole.silver_lola_slopes  ✅ COMPLETE (30,192 slope cells)
+    │  LOLA ldem_85s_40m_float.img · 40m/pixel · numpy finite-difference slope
+    │
     ▼ Aggregate per 0.25° grid cell
-    │  Compute N_suppression = max(0, (C_eq - setn_rate) / C_eq)
-    │  Join with LOLA slope (Phase 3)
-    │  Compute RPI = N_suppression / S_slope
+    │  Compute NSI = max(0, (C_baseline_csetn - csetn1_avg) / C_baseline_csetn)
+    │  Join with LOLA real slope
+    │  Compute RPI = NSI / max(slope_avg_deg, 0.1)
     ▼
-Gold: lunar_ice.south_pole.gold_rpi_shackleton  ← Phase 3
-    │  One row per grid cell, ranked by RPI
-    │  Filter: RPI >= 1.5 → candidate zones
-    │  PSR labels from config/spatial_bounds.yaml
+Gold v0.04: lunar_ice.south_pole.gold_v4_shackleton_precision  ✅ COMPLETE
+    │  11,734 cells · max RPI 0.338 · de Gerlache / Faustini / Shackleton ranked
+    │  PSR cross-reference: 1,771 within-PSR cells · Haversine 7-PSR boundary check
     ▼
-Databricks App — South Pole Ice Concentration Map
-    │  Ranked PSR shortlist for NASA extraction planning
+data/gold_v4_psr_rankings.csv  ✅ COMPLETE (890 KB · priority_tier + annotation)
+    │  Published to github.com/zwleoapp/Lunar_ice (2026-05-10)
     ▼
-Chang'e-7 Validation (July 2026+)
-    │  Cross-reference confirmed ice sites vs Gold RPI grid
+Phase 5 — Full mission scale (Sept 2009–Sept 2010, ~875k rows)
+    │  Chang'e-7 validation (July 2026+)
     ▼
-Calibrated model → next extraction candidate selection
+Calibrated model → NASA extraction candidate selection
 ```
 
 ---
