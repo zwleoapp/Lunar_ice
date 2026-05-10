@@ -1,0 +1,18 @@
+# Claude Code local settings (machine-specific)
+.claude/
+
+# Databricks secrets and config
+.databricks/
+.databrickscfg
+.python_history
+*.token
+
+# Local execution artifacts
+.runs/
+.agent_notebook_py312/
+__pycache__/
+*.pyc
+*.run.log
+
+# Local Data (Keep the logic, not the heavy blobs)
+data/raw/

@@ -1,0 +1,35 @@
+Lunar Ice Explorer — Workspace Status
+======================================
+Generated: 2026-05-10T02:25:31Z
+Agent: Haiku subagent (Task 1 chronicler)
+
+DATABRICKS ENVIRONMENT
+  Host:         https://dbc-483cf37d-fbee.cloud.databricks.com
+  Profile:      zwapp@protonmail.com
+  Compute:      Serverless (SERVERLESS)
+  Spark Version: 4.1.0
+
+CATALOG INVENTORY
+  lunar_ice            EXISTS  [target catalog]
+  melbourne-ed-monitor EXISTS
+  samples              EXISTS
+  system               EXISTS
+  weather_network_sandbox EXISTS
+  workspace            EXISTS
+
+TASK 1 RESULTS — lunar_ice.south_pole
+  lunar_ice catalog:   EXISTS (pre-existing)
+  south_pole schema:   CREATED this run (was absent — only default + information_schema existed)
+  raw_pds_blobs volume: MISSING — to be created in Task 4
+
+NEXT STEPS
+  - Create Volume raw_pds_blobs under lunar_ice.south_pole (Task 4)
+  - Initialize Bronze ingestion notebook src/bronze_ingestion.md (Task 5)
+  - Confirm created_by_agent tag propagation on south_pole schema
+
+NOTES
+  - Python 3.11 incompatible with databricks-connect 16.4.* — resolved by installing
+    Python 3.12 venv at ~/.agent_notebook_py312 and prepending to PATH for all runs.
+  - All agent-notebook runs must use:
+      PATH="/Users/gwu/.agent_notebook_py312/bin:$PATH"
+      --profile zwapp@protonmail.com --cluster SERVERLESS

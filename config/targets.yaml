@@ -1,0 +1,28 @@
+# Lunar Ice Explorer — Target Configuration
+# created_by_agent
+# All spatial values in degrees; radius in km; RPI dimensionless.
+
+targets:
+  - name: shackleton
+    description: "Shackleton Crater — primary south pole ice prospect"
+    lat: -89.9
+    lon: 0.0
+    radius_km: 20.0
+
+rpi:
+  threshold: 1.5
+  slope_clamp_min_deg: 0.1        # denominator clamp to avoid division by zero
+  min_pass_count: 3               # cells with fewer passes flagged low_confidence
+
+lend:
+  dataset_id: "LRO-L-LEND-*"
+  channel: "SETN"
+  release: 65
+
+lola:
+  resolution_m_per_px: 60
+  grid_deg: 0.25
+
+catalog: lunar_ice
+schema: south_pole
+volume: raw_pds_blobs
