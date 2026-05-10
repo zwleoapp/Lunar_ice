@@ -1,0 +1,221 @@
+# created_by_agent
+# LEND_RDR_RSCI binary column map — derived from LEND_RDR_RSCI.FMT (USGS Geosciences Node)
+# PDS3 START_BYTE is 1-indexed. Python slice: row[start_byte-1 : start_byte-1+bytes]
+# Endianness: MSB = big-endian. IEEE_REAL 8-byte = big-endian double (">d")
+# Total ROW_BYTES: 594
+
+row_bytes: 594
+endian: big  # MSB throughout
+
+# --- Science columns extracted for Silver layer ---
+science_columns:
+
+  utc:
+    col: 3
+    name: UTC
+    start_byte: 13
+    bytes: 23
+    data_type: CHARACTER
+    parse: "row[12:35].decode('ascii').strip()"
+    description: "UTC at middle of collection interval: yyyy-mm-ddThh:mm:ss.sss"
+
+  orbit_number:
+    col: 5
+    name: LRO_ORBIT_NUMBER
+    start_byte: 40
+    bytes: 4
+    data_type: MSB_UNSIGNED_INTEGER
+    struct_fmt: ">I"
+    parse: "struct.unpack_from('>I', row, 39)[0]"
+
+  latitude:
+    col: 6
+    name: LATITUDE
+    start_byte: 44
+    bytes: 8
+    data_type: IEEE_REAL
+    unit: degree
+    struct_fmt: ">d"
+    parse: "struct.unpack_from('>d', row, 43)[0]"
+    description: "Sub-spacecraft latitude, lunar fixed coordinates, middle of frame"
+
+  longitude:
+    col: 7
+    name: LONGITUDE
+    start_byte: 52
+    bytes: 8
+    data_type: IEEE_REAL
+    unit: degree
+    struct_fmt: ">d"
+    parse: "struct.unpack_from('>d', row, 51)[0]"
+    description: "Sub-spacecraft longitude, lunar fixed coordinates. FMT has typo 'LONGITIUDE'."
+
+  spacecraft_alt_km:
+    col: 29
+    name: SCALT
+    start_byte: 228
+    bytes: 8
+    data_type: IEEE_REAL
+    unit: kilometer
+    struct_fmt: ">d"
+    parse: "struct.unpack_from('>d', row, 227)[0]"
+
+  local_hour:
+    col: 30
+    name: LOCAL_HOUR
+    start_byte: 236
+    bytes: 1
+    data_type: MSB_UNSIGNED_INTEGER
+    struct_fmt: ">B"
+    parse: "row[235]"
+    description: "Local solar hour at sub-spacecraft point. PSR science: illumination state context."
+
+  local_minute:
+    col: 31
+    name: LOCAL_MINUTE
+    start_byte: 237
+    bytes: 1
+    data_type: MSB_UNSIGNED_INTEGER
+    struct_fmt: ">B"
+    parse: "row[236]"
+
+  pointing_valid:
+    col: 32
+    name: POINTING
+    start_byte: 238
+    bytes: 1
+    data_type: BOOLEAN
+    struct_fmt: ">B"
+    parse: "row[237]"
+    filter: "keep rows where pointing_valid == 1"
+
+  intersecting:
+    col: 33
+    name: INTERSECTING
+    start_byte: 239
+    bytes: 1
+    data_type: BOOLEAN
+    struct_fmt: ">B"
+    parse: "row[238]"
+    filter: "keep rows where intersecting == 1"
+
+  setn_spectrum:
+    col: 37
+    name: SETN_SPECTRUM
+    start_byte: 275
+    bytes: 32
+    items: 16
+    item_bytes: 2
+    data_type: MSB_UNSIGNED_INTEGER
+    unit: counts
+    struct_fmt: ">16H"
+    parse: "struct.unpack_from('>16H', row, 274)"
+    ground_resolution_km: 40
+    description: >
+      Uncollimated epithermal neutron counter (0.4 eV - 1 MeV). 16-bin spectrum.
+      Sum all 16 bins for total SETN count per readout interval.
+      This is the primary RPI numerator input.
+
+  csetn1_spectrum:
+    col: 40
+    name: CSETN1_SPECTRUM
+    start_byte: 371
+    bytes: 32
+    items: 16
+    item_bytes: 2
+    data_type: MSB_UNSIGNED_INTEGER
+    unit: counts
+    struct_fmt: ">16H"
+    parse: "struct.unpack_from('>16H', row, 370)"
+    ground_resolution_km: 9
+    description: >
+      Collimated epithermal neutron counter 1. 9 km ground resolution vs 40 km for SETN.
+      Preferred for Shackleton-scale (~21 km diameter) PSR targeting in Gold layer.
+
+  csetn2_spectrum:
+    col: 41
+    name: CSETN2_SPECTRUM
+    start_byte: 403
+    bytes: 32
+    items: 16
+    item_bytes: 2
+    data_type: MSB_UNSIGNED_INTEGER
+    unit: counts
+    struct_fmt: ">16H"
+    parse: "struct.unpack_from('>16H', row, 402)"
+    ground_resolution_km: 9
+
+  csetn3_spectrum:
+    col: 42
+    name: CSETN3_SPECTRUM
+    start_byte: 435
+    bytes: 32
+    items: 16
+    item_bytes: 2
+    data_type: MSB_UNSIGNED_INTEGER
+    unit: counts
+    struct_fmt: ">16H"
+    parse: "struct.unpack_from('>16H', row, 434)"
+    ground_resolution_km: 9
+
+  csetn4_spectrum:
+    col: 43
+    name: CSETN4_SPECTRUM
+    start_byte: 467
+    bytes: 32
+    items: 16
+    item_bytes: 2
+    data_type: MSB_UNSIGNED_INTEGER
+    unit: counts
+    struct_fmt: ">16H"
+    parse: "struct.unpack_from('>16H', row, 466)"
+    ground_resolution_km: 9
+
+# --- Full 46-column inventory (reference) ---
+all_columns:
+  1:  {name: LRO_TIME,              start_byte: 1,   bytes: 8,  type: MSB_UNSIGNED_INTEGER}
+  2:  {name: LEND_TIME,             start_byte: 9,   bytes: 4,  type: MSB_UNSIGNED_INTEGER}
+  3:  {name: UTC,                   start_byte: 13,  bytes: 23, type: CHARACTER}
+  4:  {name: FRAME_NUMBER,          start_byte: 36,  bytes: 4,  type: MSB_UNSIGNED_INTEGER}
+  5:  {name: LRO_ORBIT_NUMBER,      start_byte: 40,  bytes: 4,  type: MSB_UNSIGNED_INTEGER}
+  6:  {name: LATITUDE,              start_byte: 44,  bytes: 8,  type: IEEE_REAL}
+  7:  {name: LONGITUDE,             start_byte: 52,  bytes: 8,  type: IEEE_REAL}
+  8:  {name: SCPOS_INERT_X,         start_byte: 60,  bytes: 8,  type: IEEE_REAL}
+  9:  {name: SCPOS_INERT_Y,         start_byte: 68,  bytes: 8,  type: IEEE_REAL}
+  10: {name: SCPOS_INERT_Z,         start_byte: 76,  bytes: 8,  type: IEEE_REAL}
+  11: {name: SCVEL_INERT_X,         start_byte: 84,  bytes: 8,  type: IEEE_REAL}
+  12: {name: SCVEL_INERT_Y,         start_byte: 92,  bytes: 8,  type: IEEE_REAL}
+  13: {name: SCVEL_INERT_Z,         start_byte: 100, bytes: 8,  type: IEEE_REAL}
+  14: {name: LUNARPOS_INSTR_X,      start_byte: 108, bytes: 8,  type: IEEE_REAL}
+  15: {name: LUNARPOS_INSTR_Y,      start_byte: 116, bytes: 8,  type: IEEE_REAL}
+  16: {name: LUNARPOS_INSTR_Z,      start_byte: 124, bytes: 8,  type: IEEE_REAL}
+  17: {name: LUNARVEL_INSTR_X,      start_byte: 132, bytes: 8,  type: IEEE_REAL}
+  18: {name: LUNARVEL_INSTR_Y,      start_byte: 140, bytes: 8,  type: IEEE_REAL}
+  19: {name: LUNARVEL_INSTR_Z,      start_byte: 148, bytes: 8,  type: IEEE_REAL}
+  20: {name: SCPOS_MOON_X,          start_byte: 156, bytes: 8,  type: IEEE_REAL}
+  21: {name: SCPOS_MOON_Y,          start_byte: 164, bytes: 8,  type: IEEE_REAL}
+  22: {name: SCPOS_MOON_Z,          start_byte: 172, bytes: 8,  type: IEEE_REAL}
+  23: {name: INSTR_BORESIGHT_MOON_X,start_byte: 180, bytes: 8,  type: IEEE_REAL}
+  24: {name: INSTR_BORESIGHT_MOON_Y,start_byte: 188, bytes: 8,  type: IEEE_REAL}
+  25: {name: INSTR_BORESIGHT_MOON_Z,start_byte: 196, bytes: 8,  type: IEEE_REAL}
+  26: {name: SUB_SCPOS_MOON_X,      start_byte: 204, bytes: 8,  type: IEEE_REAL}
+  27: {name: SUB_SCPOS_MOON_Y,      start_byte: 212, bytes: 8,  type: IEEE_REAL}
+  28: {name: SUB_SCPOS_MOON_Z,      start_byte: 220, bytes: 8,  type: IEEE_REAL}
+  29: {name: SCALT,                 start_byte: 228, bytes: 8,  type: IEEE_REAL}
+  30: {name: LOCAL_HOUR,            start_byte: 236, bytes: 1,  type: MSB_UNSIGNED_INTEGER}
+  31: {name: LOCAL_MINUTE,          start_byte: 237, bytes: 1,  type: MSB_UNSIGNED_INTEGER}
+  32: {name: POINTING,              start_byte: 238, bytes: 1,  type: BOOLEAN}
+  33: {name: INTERSECTING,          start_byte: 239, bytes: 1,  type: BOOLEAN}
+  34: {name: DATA_COLLECTION_TIME,  start_byte: 240, bytes: 2,  type: MSB_UNSIGNED_INTEGER}
+  35: {name: PARAMETERS_CHANGED,    start_byte: 242, bytes: 1,  type: MSB_UNSIGNED_INTEGER}
+  36: {name: STN1_SPECTRUM,         start_byte: 243, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  37: {name: SETN_SPECTRUM,         start_byte: 275, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  38: {name: STN2_SPECTRUM,         start_byte: 307, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  39: {name: STN3_SPECTRUM,         start_byte: 339, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  40: {name: CSETN1_SPECTRUM,       start_byte: 371, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  41: {name: CSETN2_SPECTRUM,       start_byte: 403, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  42: {name: CSETN3_SPECTRUM,       start_byte: 435, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  43: {name: CSETN4_SPECTRUM,       start_byte: 467, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  44: {name: SHEN1_SPECTRUM,        start_byte: 499, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  45: {name: SHEN2_SPECTRUM,        start_byte: 531, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}
+  46: {name: SHEN3_SPECTRUM,        start_byte: 563, bytes: 32, type: MSB_UNSIGNED_INTEGER, items: 16}

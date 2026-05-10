@@ -11,7 +11,7 @@ agent-notebook:
 ```
 
 ```python
-import io, requests, yaml, datetime
+import requests, yaml, datetime
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType
 
@@ -65,11 +65,11 @@ records  = []
 skipped  = 0
 ingested = datetime.datetime.utcnow().isoformat() + "Z"
 
-tab = requests.get(INDEX_TAB, timeout=120, stream=True)
+tab = requests.get(INDEX_TAB, timeout=300, stream=True)
 tab.raise_for_status()
 
-for raw in io.TextIOWrapper(tab.raw, encoding="latin-1"):
-    row = raw.rstrip("\r\n")
+for raw in tab.iter_lines():
+    row = raw.decode("latin-1").rstrip("\r\n")
     if not row:
         continue
 

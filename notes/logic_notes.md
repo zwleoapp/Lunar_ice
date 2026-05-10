@@ -31,6 +31,71 @@ escaping to orbit. This suppression is the primary neutron signature of near-sur
 
 ---
 
+## Gold v0.03 Confirmed Values (2026-05-10)
+
+| Parameter | Value | Source |
+|---|---|---|
+| C_baseline | **12.9864 counts** | AVG(setn_total) over 71,327 Silver rows |
+| C_stddev | 4.1197 | STDDEV(setn_total), June 2010 |
+| mock_slope_deg | 2.0° | Config table; PSR floors typically 1–3° |
+| Surviving cells | 11,734 | pass_count ≥ 3 filter on 23,933 total cells |
+| Cells with positive NSI | 5,563 (47%) | setn_avg < C_baseline |
+| Max NSI | 1.0 | setn_avg = 0 in 3-pass minimum cells |
+| Max RPI | 0.5 | = NSI_max / mock_slope = 1.0 / 2.0 |
+| Avg RPI | 0.033 | Most cells show weak suppression |
+| Within-PSR avg RPI | 0.0336 vs 0.0329 | PSR cells score slightly higher ✓ |
+
+**RPI threshold note:** The 1.5 target applies when real LOLA slopes replace mock_slope.
+At mock_slope = 2.0°, max achievable RPI = 0.5. When LOLA floors at ~0.5° are used,
+the same NSI = 1.0 cell yields RPI = 1.0 / 0.5 = 2.0 — above threshold. This is why
+v0.04 LOLA ingestion is critical for the threshold to be meaningful.
+
+---
+
+## Gold v0.04 Confirmed Values (2026-05-10)
+
+| Parameter | Value | Source |
+|---|---|---|
+| C_baseline_csetn | **2.9902 counts** | AVG(csetn1_total) over 71,327 Silver rows |
+| Surviving CSETN cells | 11,734 | pass_count ≥ 3 filter — same as v0.03 SETN grid |
+| Cells with positive NSI | 5,478 (47%) | csetn1_avg < C_baseline_csetn |
+| LOLA slope range | 1.80°–33.54° | cell averages from ldem_85s_40m, 40m/pixel DEM |
+| LOLA slope mean | 9.9° | south polar terrain is rugged |
+| Max RPI_real | 0.3382 | NSI=1.0 / slope=2.96° |
+| RPI threshold | 1.5 (unmet) | min cell slope = 1.8° → max RPI = 1.0/1.8 = 0.556 |
+
+**RPI threshold analysis:** The 1.5 target requires slope ≤ NSI/1.5 ≤ 0.667°. At 0.25° cell resolution,
+the minimum observed LOLA slope is 1.8° (cell-averaged). The threshold is meaningful only at pixel-level
+(e.g., PGDA 5m/pix for Shackleton), not at LEND grid scale.
+
+**LOLA DEM discovery:** The LOLA GDR is inside `lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/`
+on pds-geosciences.wustl.edu — NOT a separate `lola-4-gdr` archive. File `ldem_85s_40m_float.img`:
+7584 × 7584 pixels, float32 PC_REAL (little-endian), MAP_SCALE = 40 m/pixel, values in km.
+
+---
+
+## CSETN Grid Resolution — v0.04 Design Decision (2026-05-10)
+
+CSETN footprint ≈ **9 km diameter** at 50 km LRO altitude. Grid must be matched to this physical limit.
+
+| Grid | Lat cell size | Lon cell at −89° | Shackleton cells (21 km diam) | Verdict |
+|---|---|---|---|---|
+| 0.1° | 3 km | 53 m | ~7 lat | Over-resolved in lon; adjacent cells share same footprint |
+| **0.25°** | **7.5 km** | **130 m** | **~3 lat** | **Chosen — sub-footprint via 379-pass averaging; aligns with v0.03 SETN grid** |
+| 0.3° | 9.1 km | 157 m | ~2 lat | Nyquist-matched in latitude; physically rigorous |
+| 0.5° | 15.2 km | 262 m | ~1 lat | Published LEND standard; too coarse for PSR interior |
+
+**Decision: 0.25°** chosen for two reasons:
+1. Direct SETN↔CSETN comparison: same cell boundaries as v0.03 — can diff suppression maps cell-by-cell.
+2. 379-pass multi-pass averaging justifies sub-footprint resolution in latitude.
+
+**Longitude caveat at deep pole:** At −89°S, 0.25° in longitude = ~130 m — 70× smaller than the
+9 km footprint. Lon-adjacent cells near the geographic pole are physically correlated. This is
+unavoidable for any grid finer than ~15° in longitude at −89°S. The scientific gains in v0.04 are
+the CSETN signal sharpness (9 km vs 40 km) and real LOLA slope — not grid density.
+
+---
+
 ## Normalization — LEND PDS4 Release 65 (March 2026)
 
 ### Step 1 — Raw Count Rate
@@ -94,31 +159,111 @@ All data will be registered to:
 
 ---
 
-## Dataflow Summary
+## Dataflow Summary (updated 2026-05-10)
 
 ```
-PDS4 Registry (pds.peppi)
+PDS3 Geosciences Node (pds-geosciences.wustl.edu)
     │
-    ▼ label metadata (geographic filter)
+    ▼ index.tab (10.6 MB, 34,751 rows, fixed-width)
 Bronze: lunar_ice.south_pole.bronze_lend_metadata
+    │  28,729 science rows, partitioned by release_id
     │
-    ▼ download .dat files → raw_pds_blobs volume
-    │  parse count_rate per integration
-    │  apply C_bg correction
-    │  compute N_suppression per pass
+    ▼ Phase filter (drop CRUISE, COMMISSIONING)
+    │  Time slice (pilot: 2010-06-01 to 2010-06-03)
+    │  Download .DAT files (binary, 594 bytes/row)
+    │  Parse with Python struct (big-endian)
+    │  Filter: lat <= -85.0° + POINTING + INTERSECTING flags
     ▼
-Silver: lunar_ice.south_pole.silver_lend_suppression
+Silver: lunar_ice.south_pole.silver_lend_targets  ← PILOT COMPLETE (7,209 rows)
+    │  One row per detector readout over south pole PSRs
+    │  Columns: utc, orbit, lat, lon, alt, local_hour,
+    │           setn_total, csetn1–4_total, binary_data_url
     │
-    ▼ aggregate per grid cell
-    │  join with LOLA slope (Phase 2)
-    │  compute RPI = N_suppression / S_slope
+    ▼ Aggregate per 0.25° grid cell
+    │  Compute N_suppression = max(0, (C_eq - setn_rate) / C_eq)
+    │  Join with LOLA slope (Phase 3)
+    │  Compute RPI = N_suppression / S_slope
     ▼
-Gold: lunar_ice.south_pole.gold_rpi_shackleton
-    │
-    ▼ filter RPI >= 1.5 (threshold from config/targets.yaml)
+Gold: lunar_ice.south_pole.gold_rpi_shackleton  ← Phase 3
+    │  One row per grid cell, ranked by RPI
+    │  Filter: RPI >= 1.5 → candidate zones
+    │  PSR labels from config/spatial_bounds.yaml
     ▼
-Databricks App — Shackleton Ice Map
+Databricks App — South Pole Ice Concentration Map
+    │  Ranked PSR shortlist for NASA extraction planning
+    ▼
+Chang'e-7 Validation (July 2026+)
+    │  Cross-reference confirmed ice sites vs Gold RPI grid
+    ▼
+Calibrated model → next extraction candidate selection
 ```
+
+---
+
+## Binary Row Parsing — LEND_RDR_RSCI.FMT (confirmed 2026-05-10)
+
+Full spec: `config/lend_rsci_fmt.yaml`. Key findings from the FMT file:
+
+### Row layout
+- `ROW_BYTES = 594`, big-endian (MSB) throughout
+- `IEEE_REAL` 8-byte fields → Python `struct` format `">d"` (big-endian double)
+- `MSB_UNSIGNED_INTEGER` → `">B"` (1 byte), `">H"` (2 bytes), `">I"` (4 bytes)
+- Spectrum fields are 16-bin arrays: `">16H"` (16 × 2-byte unsigned int)
+- `CHARACTER` fields: raw bytes decoded as ASCII
+
+### Science field byte offsets (1-indexed, Python offset = start_byte − 1)
+
+| Field | Col | Start_byte | Bytes | Format | Notes |
+|---|---|---|---|---|---|
+| UTC | 3 | 13 | 23 | ASCII string | `yyyy-mm-ddThh:mm:ss.sss` |
+| LRO_ORBIT_NUMBER | 5 | 40 | 4 | `">I"` | Increments at descending node |
+| LATITUDE | 6 | 44 | 8 | `">d"` | Sub-spacecraft lat, lunar fixed |
+| LONGITUDE | 7 | 52 | 8 | `">d"` | FMT typo: 'LONGITIUDE' |
+| SCALT | 29 | 228 | 8 | `">d"` | Altitude in km (~50 km nominal) |
+| LOCAL_HOUR | 30 | 236 | 1 | `">B"` | Local solar hour |
+| LOCAL_MINUTE | 31 | 237 | 1 | `">B"` | Local solar minute |
+| POINTING | 32 | 238 | 1 | `">B"` | Quality flag: 1 = valid pointing |
+| INTERSECTING | 33 | 239 | 1 | `">B"` | Quality flag: 1 = boresight hits Moon |
+| SETN_SPECTRUM | 37 | 275 | 32 | `">16H"` | 16-bin epithermal spectrum, sum for RPI |
+| CSETN1–4_SPECTRUM | 40–43 | 371–467 | 32 each | `">16H"` | Collimated SETN, 9 km resolution |
+
+### Quality filters applied in Silver
+Keep only rows where `POINTING == 1` AND `INTERSECTING == 1`.
+Rows with invalid pointing have zeroed position vectors and must not contribute to the spatial grid.
+
+### SETN vs CSETN for RPI
+- **SETN** (col 37): uncollimated, ~40 km ground resolution — broad mapping
+- **CSETN1–4** (cols 40–43): collimated, ~9 km ground resolution — Shackleton-scale precision
+
+Silver layer stores both. Gold layer uses CSETN for the PSR concentration map.
+
+---
+
+## Two-Tier PSR Geographic Gate
+
+| Tier | Threshold | Target PSRs |
+|---|---|---|
+| Primary | lat ≤ −88.0° | Shackleton (−89.9°), de Gerlache (−88.3°) |
+| Secondary | lat ≤ −85.0° | Nobile (−85.2°), Cabeus (−84.9°), Haworth (−87.5°), Faustini (−87.2°) |
+
+Silver pilot uses −85° (captures all PSRs). Gold can filter further by tier and by PSR polygon.
+
+**Cabeus note:** LCROSS 2009 confirmed water ice in Cabeus ejecta plume — highest-confidence ice
+detection to date. LEND SETN measurements over Cabeus provide a ground-truth calibration anchor
+for the RPI scale.
+
+---
+
+## Silver Chunk Strategy
+
+| Chunk | Window | Files | Download | Rows | Status |
+|---|---|---|---|---|---|
+| Pilot | 2010-06-01 to 2010-06-03 | 3 | 153 MB | 7,209 | ✅ DONE |
+| Month | 2010-06-01 to 2010-06-30 | 30 | 1.54 GB | 71,327 | ✅ DONE |
+| Full nominal | 2009-09 to 2010-09 | ~365 | ~18 GB | ~875k | Phase 4+ |
+
+June 2010 chosen: mid-nominal-mission, avoids commissioning artifacts, 
+data quality flags stable, good south pole pass geometry.
 
 ---
 

@@ -14,5 +14,11 @@ __pycache__/
 *.pyc
 *.run.log
 
+# Notebook execution output dirs (re-runnable; keep source .md only)
+src/*_output/
+
 # Local Data (Keep the logic, not the heavy blobs)
 data/raw/
+
+# System files
+.DS_Store

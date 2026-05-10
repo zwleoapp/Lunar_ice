@@ -1,0 +1,88 @@
+# created_by_agent
+# Spatial bounds for Lunar Ice Explorer south pole ice targeting
+# All coordinates in degrees, lunar fixed frame
+
+shackleton:
+  # Two-tier PSR gate — see logic_notes.md for scientific rationale
+  primary_lat_max:   -88.0   # Primary: Shackleton (-89.9°), de Gerlache (-88.3°)
+  secondary_lat_max: -85.0   # Secondary: all major PSRs (Silver filter uses this)
+  lon_range: [0, 360]         # Full longitude — polar orbit covers all longitudes
+
+# Key Permanently Shadowed Regions (PSRs) — south pole ice candidate zones
+# Priority ranked by: LCROSS confirmation, LEND suppression evidence, accessibility
+psrs:
+  - name: Shackleton
+    lat: -89.67
+    lon: 129.47
+    diameter_km: 21.0
+    priority: 1
+    notes: "Primary target. ~4 km deep, permanently shadowed floor."
+
+  - name: de_Gerlache
+    lat: -88.33
+    lon: 272.01
+    diameter_km: 32.0
+    priority: 2
+    notes: "Adjacent to Shackleton. High ice signal in LEND surveys."
+
+  - name: Haworth
+    lat: -87.47
+    lon: 355.33
+    diameter_km: 51.0
+    priority: 3
+    notes: "Large well-shadowed basin near Shackleton."
+
+  - name: Faustini
+    lat: -87.20
+    lon: 83.25
+    diameter_km: 43.0
+    priority: 4
+    notes: "Deep cold floor. Strong suppression candidate."
+
+  - name: Sverdrup
+    lat: -88.00
+    lon: 152.50
+    diameter_km: 33.0
+    priority: 5
+    notes: "High latitude, consistently shadowed."
+
+  - name: Nobile
+    lat: -85.18
+    lon: 53.53
+    diameter_km: 73.0
+    priority: 6
+    notes: "Large crater, NASA Artemis site proximity."
+
+  - name: Cabeus
+    lat: -84.90
+    lon: 316.00
+    diameter_km: 98.0
+    priority: 7
+    notes: "LCROSS 2009 impact confirmed water ice. Ground-truth calibration anchor for RPI."
+
+# Silver processing windows
+silver_chunks:
+  pilot:
+    start_date:             "2010-06-01"
+    end_date:               "2010-06-03"
+    product_type:           "LEND_RDR_RSCI"
+    mission_phase_exclude:  ["CRUISE", "COMMISSIONING"]
+    status:                 "COMPLETE — 7,209 rows in silver_lend_targets"
+
+  month_june2010:
+    start_date:             "2010-06-01"
+    end_date:               "2010-06-30"
+    product_type:           "LEND_RDR_RSCI"
+    mission_phase_exclude:  ["CRUISE", "COMMISSIONING"]
+    status:                 "COMPLETE — 71,327 rows in silver_lend_targets"
+
+# Chang'e-7 validation
+change7:
+  launch_window:  "2026-07"
+  target:         "Lunar south pole PSRs"
+  detector:       "Flying mini-probe for in-situ ice detection"
+  validation_plan: >
+    Once Chang'e-7 dataset is published, cross-reference confirmed ice detection
+    sites against Gold layer RPI grid. PSR cells with RPI >= 1.5 that align with
+    Chang'e-7 ice detections validate the LEND-derived model. Discrepancies
+    guide calibration of C_eq baseline and RPI threshold.
