@@ -7,6 +7,7 @@
 .python_history
 *.token
 
+
 # Local execution artifacts
 .runs/
 .agent_notebook_py312/
@@ -17,8 +18,20 @@ __pycache__/
 # Notebook execution output dirs (re-runnable; keep source .md only)
 src/*_output/
 
+# Exploratory probe notebooks (not part of production pipeline)
+src/lola_archive_probe.md
+src/lola_probe2.md
+src/lola_probe3.md
+src/lola_probe4.md
+src/lola_probe5.md
+src/lola_probe6.md
+src/lola_probe7.md
+src/lola_probe_lslo.md
+
 # Local Data (Keep the logic, not the heavy blobs)
 data/raw/
 
 # System files
 .DS_Store
+notes/
+action/

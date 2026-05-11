@@ -1,11 +1,5 @@
 # Project: Lunar Ice explorer
 
-
-## Databricks Identity
-- Host: https://dbc-483cf37d-fbee.cloud.databricks.com
-- Profile: zwapp@protonmail.com
-- Mode: Serverless (No Cluster ID required) 
-
 ## Environment
 - Platform: Databricks (Unity Catalog enabled)
 - Execution Tool: databricks-agent-notebooks
@@ -25,15 +19,8 @@
 - R and Scala unsupported
 - As at 10 May 2026
 
-
-## Rules of Engagement
-- Always Haiku as subagent to explore and read, Sonnet 4.5 plan in `plan_notes.md` before writing production code.
-- Always Haiku to put down details as why code created or changed in `code_study_notes.md` after codes are written down.
-- All logic execution and workspace interactions must be performed via the agent-notebook CLI using --profile zwapp@protonmail.com --serverless
-- Always include `--profile zwapp@protonmail.com` and `--serverless` in commands.
-- Always write down `logic_notes.md` for dataflow and logic calculation.
-- Prefer Markdown-based notebooks (.md) for persistence.
-
+## Rule of enegaement
+- refer to notes/playbook.md
 
 ## Standards
 - Follow Medallion Architecture (Bronze -> Silver -> Gold).
@@ -41,22 +28,3 @@
 - Always separate config and scripts, ensure no hardcoded in logic scripts or UI view or Input
 - Always keep codes lean no more than 300 lines in each script file
 
-## Project folder structure
-Lunar_ice/
-├── .runs/               # Execution artifacts & logs
-├── config/              # targets.yaml, calibration_constants.yaml
-├── notes/               # The "Project Brain"
-│   ├── logic_notes.md   # Mathematical formulas (RPI)
-│   ├── plan_notes.md    # Strategy & Medallion roadmap
-│   ├── code_study_notes.md # Agent rationale & chronicling
-│   └── workspace_status.txt # Connectivity & environment logs
-├── src/                 # Executable Notebooks/Scripts
-│   ├── smoke_test.md
-│   └── bronze_ingestion.md
-├── CLAUDE.md            # System instructions
-└── action_v0.01.md      # Active directive
-
-## Resilience & Persistence
-- **Source of Truth:** Local files are the Master. Never treat the Databricks Workspace as permanent storage.
-- **Git Sync:** Before ending a session, ensure all changed files in `/src`, `/config`, and `/notes` are staged for Git.
-- **Data Safety:** Gold-layer results must be exported to local `.csv` periodically to mitigate Free-Tier deletion risks.
